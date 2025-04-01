@@ -1,0 +1,9 @@
+[project]
+name = "autodeploy"
+version = "0.1.0"
+description = "Automatically deploy a git managed docker compose file"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "bottle>=0.13.2",
+]

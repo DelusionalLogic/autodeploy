@@ -54,7 +54,7 @@ def update_server():
     last_update_text += process.stdout.decode()
     if process.returncode != 0:
         last_update_success = False
-        last_update_text += "Failed!"
+        last_update_text += "Failed!\n"
         return
 
     process = subprocess.run(
@@ -66,7 +66,7 @@ def update_server():
     last_update_text += process.stdout.decode()
     if process.returncode != 0:
         last_update_success = False
-        last_update_text += "Failed!"
+        last_update_text += "Failed!\n"
         return
 
     process = subprocess.run(
@@ -76,13 +76,16 @@ def update_server():
     if process.returncode != 0:
         raise Exception("Failed to move tag")
 
+    last_update_text += "Updated!\n"
+    last_update_success = True
+
 def fetch_new_versions(git_url, repodir, keyfile):
     # Do some startup activities
     if not repodir.exists():
         retcode = subprocess.call(
             [
                 "git", "clone",
-                "--branch", "master",
+                "--branch", "target",
                 "--depth", "1",
                 git_url,
                 str(repodir.resolve())
@@ -110,7 +113,7 @@ def fetch_new_versions(git_url, repodir, keyfile):
             raise Exception("Git fetch failed")
 
         process = subprocess.run(
-            [ "git", "show-ref", "--hash", "refs/heads/master" ],
+            [ "git", "show-ref", "--hash", "refs/tags/target" ],
             cwd = str(repodir.resolve()),
             stdout=subprocess.PIPE
         )
@@ -119,7 +122,7 @@ def fetch_new_versions(git_url, repodir, keyfile):
             assert(len(process.stdout) == 41)
             master_hash = process.stdout[:-1]
         else:
-            raise Exception("Failed to resolve master version")
+            raise Exception("Failed to resolve target version")
 
         assert(master_hash is not None)
 
@@ -152,6 +155,15 @@ def fetch_new_versions(git_url, repodir, keyfile):
 
         if needs_update:
             print("Updating...")
+            retcode = subprocess.call(
+                [
+                    "git", "switch", "--detach", "refs/tags/target",
+                ],
+                cwd = str(repodir.resolve())
+            )
+            if retcode != 0:
+                raise Exception("Git switch failed")
+
             update_server()
 
         # Sleep until next attempt

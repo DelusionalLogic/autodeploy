@@ -1,5 +1,6 @@
 import os
 import pathlib
+import shutil
 import subprocess
 import threading
 import time
@@ -33,6 +34,16 @@ def update_server():
     last_update_success = False
     last_update_text = "Updating...\n"
     last_update_ts = datetime.now()
+
+    last_update_text += "Load docker config\n"
+    input_docker_config = workdir / "docker_config.json"
+
+    docker_dir = pathlib.Path.home() / ".docker"
+    docker_dir.mkdir(exist_ok=True)
+    docker_config = docker_dir / "config.json"
+
+    shutil.copy(str(input_docker_config), str(docker_config))
+
 
     process = subprocess.run(
         [ "/usr/bin/docker-compose", "--file", "horse.yml", "pull" ],

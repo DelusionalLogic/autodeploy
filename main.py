@@ -105,6 +105,7 @@ def fetch_new_versions(git_url, repodir, keyfile):
             [
                 "git", "fetch", "origin",
                 "--depth", "1",
+                "+refs/tags/target:refs/tags/target",
             ],
             env = {"GIT_SSH_COMMAND": "ssh -i " + str(keyfile.resolve()) + " -o IdentitiesOnly=yes"},
             cwd = str(repodir.resolve())
